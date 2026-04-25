@@ -61,7 +61,7 @@ const EMPTY_FORM = {
 export default function Calendar() {
   const calendarRef = useRef(null)
   const { appointments, selectedDate, setSelectedDate, addAppointment,
-    completeAppointment, cancelAppointment, deleteAppointment,
+    updateAppointment, completeAppointment, cancelAppointment, deleteAppointment,
     fetchAppointments } = useCalendarStore()
   const { fetchLeads } = useLeadsStore()
 
@@ -139,8 +139,24 @@ export default function Calendar() {
     if (!form.titulo.trim()) return
     setSaving(true)
     try {
-      await addAppointment(form)
+      if (editTarget) {
+        const startDate = new Date(`${form.date}T${form.time}`)
+        const endDate = new Date(startDate.getTime() + Number(form.duracao) * 60000)
+        await updateAppointment(editTarget.id, {
+          titulo: form.titulo,
+          tipo: form.tipo,
+          descricao: form.descricao || null,
+          inicio: startDate.toISOString().slice(0, 19),
+          fim: endDate.toISOString().slice(0, 19),
+          duracao: Number(form.duracao),
+          lead_id: form.lead?.id || editTarget.lead_id || null,
+          lead_name: form.lead?.nombre || form.leadSearch || editTarget.lead_name || null,
+        })
+      } else {
+        await addAppointment(form)
+      }
       setModalOpen(false)
+      setEditTarget(null)
       setForm(EMPTY_FORM)
     } finally {
       setSaving(false)
