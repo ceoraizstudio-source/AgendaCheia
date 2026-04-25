@@ -11,7 +11,7 @@ export const useLeadsStore = create((set, get) => ({
       .from('leads')
       .select('*')
       .order('created_at', { ascending: false })
-    if (!error) set({ leads: data || [] })
+    if (!error) set({ leads: (data || []).map(mapRow) })
     set({ loading: false })
   },
 
