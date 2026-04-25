@@ -26,6 +26,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_messages_platform_id
   ON public.messages (platform_message_id)
   WHERE platform_message_id IS NOT NULL;
 
+-- Controle de envio (evita n8n reenviar a mesma mensagem)
+ALTER TABLE public.messages
+  ADD COLUMN IF NOT EXISTS sent_to_platform boolean DEFAULT false;
+
 -- ─── Ativar Realtime ──────────────────────────────────────────────────────────
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.conversations;
