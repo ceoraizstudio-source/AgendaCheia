@@ -73,6 +73,7 @@ export default function Calendar() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
+  const lastClickRef = useRef({ date: null, time: 0 })
 
   /* Convert appointments → FullCalendar events */
   const events = appointments.map((a) => ({
@@ -197,7 +198,26 @@ export default function Calendar() {
             }}
             events={events}
             selectable
-            dateClick={(info) => setSelectedDate(info.dateStr)}
+            dateClick={(info) => {
+              const now = Date.now()
+              const last = lastClickRef.current
+              if (last.date === info.dateStr && now - last.time < 350) {
+                lastClickRef.current = { date: null, time: 0 }
+                setSelectedDate(info.dateStr)
+                setEditTarget(null)
+                setForm({
+                  ...EMPTY_FORM,
+                  date: info.dateStr,
+                  time: info.dateStr.length > 10
+                    ? info.dateStr.slice(11, 16)
+                    : EMPTY_FORM.time,
+                })
+                setModalOpen(true)
+              } else {
+                lastClickRef.current = { date: info.dateStr, time: now }
+                setSelectedDate(info.dateStr)
+              }
+            }}
             eventClick={(info) => {
               const appt = info.event.extendedProps.appointment
               setSelectedDate(appt.inicio.slice(0, 10))
