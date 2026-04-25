@@ -1,23 +1,31 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { useAuthStore } from '../store/useAuthStore'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 export default function Login() {
   const navigate = useNavigate()
+  const signIn = useAuthStore((s) => s.signIn)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    // Phase 1: mock — go straight to pipeline.
-    await new Promise((r) => setTimeout(r, 350))
-    setLoading(false)
-    navigate('/pipeline')
+    try {
+      await signIn(email, password)
+      navigate('/pipeline')
+    } catch (err) {
+      setError('E-mail ou senha incorretos.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -108,6 +116,12 @@ export default function Login() {
                 </button>
               </div>
             </div>
+
+            {error && (
+              <p className="text-[12px] font-medium" style={{ color: 'var(--color-danger)' }}>
+                {error}
+              </p>
+            )}
 
             <Button
               type="submit"
