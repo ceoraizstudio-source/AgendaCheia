@@ -132,7 +132,7 @@ export default function NewLeadModal() {
               options={CANAIS}
             />
           </Field>
-          <Field label="Valor Estimado (R$)" error={errors.valor_estimado}>
+          <Field label="Valor da Consulta (R$)" error={errors.valor_estimado}>
             <Input
               placeholder="Ex: 45000"
               value={form.valor_estimado}
