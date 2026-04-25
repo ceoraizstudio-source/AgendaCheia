@@ -258,10 +258,8 @@ export const mockMessages = {
 }
 
 export const APPOINTMENT_TYPES = [
-  { value: 'ligacao',  label: 'Ligação',    color: '#f5a623' },
-  { value: 'demo',     label: 'Demo',       color: '#3498db' },
-  { value: 'followup', label: 'Follow-up',  color: '#2ecc71' },
-  { value: 'reuniao',  label: 'Reunião',    color: '#9b59b6' },
+  { value: 'consulta',    label: 'Consulta',      color: '#f5a623' },
+  { value: 'videochamada', label: 'Video Chamada', color: '#3498db' },
 ]
 
 export const DURATIONS = [

@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   XCircle,
   Pencil,
+  Trash2,
   Bot,
   User,
   CalendarDays,
@@ -45,7 +46,7 @@ const VIEW_OPTIONS = [
 
 const EMPTY_FORM = {
   titulo: '',
-  tipo: 'ligacao',
+  tipo: 'consulta',
   date: format(new Date(), 'yyyy-MM-dd'),
   time: '09:00',
   duracao: '30',
@@ -72,7 +73,7 @@ export default function Calendar() {
   /* Convert appointments → FullCalendar events */
   const events = appointments.map((a) => ({
     id: a.id,
-    title: a.titulo,
+    title: a.lead_name ? `${a.titulo} · ${a.lead_name}` : a.titulo,
     start: a.inicio,
     end: a.fim,
     backgroundColor: a.status === 'cancelada'
@@ -262,6 +263,7 @@ export default function Calendar() {
                     onEdit={() => openEdit(appt)}
                     onComplete={() => completeAppointment(appt.id)}
                     onCancel={() => cancelAppointment(appt.id)}
+                    onDelete={() => deleteAppointment(appt.id)}
                   />
                 ))}
               </div>
@@ -294,7 +296,7 @@ export default function Calendar() {
 
 /* ─── Appointment item in panel ───────────────────── */
 
-function AppointmentItem({ appt, onEdit, onComplete, onCancel }) {
+function AppointmentItem({ appt, onEdit, onComplete, onCancel, onDelete }) {
   const color = typeColor(appt.tipo)
   const isCanceled = appt.status === 'cancelada'
   const isDone = appt.status === 'completada'
@@ -369,34 +371,44 @@ function AppointmentItem({ appt, onEdit, onComplete, onCancel }) {
         </div>
 
         {/* Action buttons */}
-        {!isDone && !isCanceled && (
-          <div className="flex gap-1.5 mt-2">
-            <button
-              onClick={onEdit}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'var(--color-bg-elevated)', color: 'var(--color-text-secondary)' }}
-            >
-              <Pencil size={10} strokeWidth={2} />
-              Editar
-            </button>
-            <button
-              onClick={onComplete}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'rgba(46,204,113,0.12)', color: 'var(--color-success)' }}
-            >
-              <CheckCircle2 size={10} strokeWidth={2} />
-              Concluir
-            </button>
-            <button
-              onClick={onCancel}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'rgba(231,76,60,0.1)', color: 'var(--color-danger)' }}
-            >
-              <XCircle size={10} strokeWidth={2} />
-              Cancelar
-            </button>
-          </div>
-        )}
+        <div className="flex gap-1.5 mt-2 flex-wrap">
+          {!isDone && !isCanceled && (
+            <>
+              <button
+                onClick={onEdit}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: 'var(--color-bg-elevated)', color: 'var(--color-text-secondary)' }}
+              >
+                <Pencil size={10} strokeWidth={2} />
+                Editar
+              </button>
+              <button
+                onClick={onComplete}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: 'rgba(46,204,113,0.12)', color: 'var(--color-success)' }}
+              >
+                <CheckCircle2 size={10} strokeWidth={2} />
+                Concluir
+              </button>
+              <button
+                onClick={onCancel}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: 'rgba(231,76,60,0.1)', color: 'var(--color-danger)' }}
+              >
+                <XCircle size={10} strokeWidth={2} />
+                Cancelar
+              </button>
+            </>
+          )}
+          <button
+            onClick={onDelete}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[5px] text-[11px] cursor-pointer hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'rgba(231,76,60,0.08)', color: 'var(--color-danger)' }}
+          >
+            <Trash2 size={10} strokeWidth={2} />
+            Excluir
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -493,12 +505,12 @@ function AppointmentModal({ open, onClose, form, setForm, onSave, editMode, savi
 
         {/* Type */}
         <Field label="Tipo de compromisso">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {APPOINTMENT_TYPES.map((t) => (
               <button
                 key={t.value}
                 onClick={() => set('tipo', t.value)}
-                className="flex flex-col items-center gap-1.5 py-2.5 rounded-[10px] text-[11px] font-semibold cursor-pointer transition-all"
+                className="py-3 rounded-[10px] text-[13px] font-semibold cursor-pointer transition-all"
                 style={{
                   backgroundColor: form.tipo === t.value
                     ? `${t.color}20` : 'var(--color-bg-elevated)',
@@ -506,9 +518,6 @@ function AppointmentModal({ open, onClose, form, setForm, onSave, editMode, savi
                   color: form.tipo === t.value ? t.color : 'var(--color-text-secondary)',
                 }}
               >
-                <span className="text-base">{
-                  { ligacao: '📞', demo: '💻', followup: '🔄', reuniao: '👥' }[t.value]
-                }</span>
                 {t.label}
               </button>
             ))}
