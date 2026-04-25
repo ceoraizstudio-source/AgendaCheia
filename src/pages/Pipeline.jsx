@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -7,7 +7,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { SlidersHorizontal, MoreHorizontal } from 'lucide-react'
+import { SlidersHorizontal, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useLeadsStore } from '../store/useLeadsStore'
 import { PIPELINE_STAGES } from '../lib/mockData'
 import { formatCurrency, cn } from '../lib/cn'
@@ -195,6 +195,24 @@ function DealCard({ lead, hidden }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
   })
+  const { deleteLead } = useLeadsStore()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
+
+  const handleDelete = async (e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    await deleteLead(lead.id)
+  }
 
   const style = {
     transform: transform
@@ -221,14 +239,37 @@ function DealCard({ lead, hidden }) {
         <div className="font-heading text-[15px] leading-tight">
           {lead.nombre}
         </div>
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          className="p-0.5 -mr-1 rounded cursor-pointer hover:bg-white/5"
-          style={{ color: 'var(--color-text-muted)' }}
-          aria-label="Opções"
-        >
-          <MoreHorizontal size={14} strokeWidth={1.5} />
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o) }}
+            className="p-0.5 -mr-1 rounded cursor-pointer hover:bg-white/5"
+            style={{ color: 'var(--color-text-muted)' }}
+            aria-label="Opções"
+          >
+            <MoreHorizontal size={14} strokeWidth={1.5} />
+          </button>
+          {menuOpen && (
+            <div
+              className="absolute right-0 top-6 z-50 rounded-[10px] overflow-hidden py-1 min-w-[140px]"
+              style={{
+                backgroundColor: 'var(--color-bg-elevated)',
+                border: '1px solid var(--color-border)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              }}
+            >
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={handleDelete}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium cursor-pointer hover:bg-white/5 transition-colors"
+                style={{ color: 'var(--color-danger)' }}
+              >
+                <Trash2 size={13} strokeWidth={1.5} />
+                Excluir Lead
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div
