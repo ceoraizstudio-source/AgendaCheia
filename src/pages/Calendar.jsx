@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -60,7 +60,10 @@ const EMPTY_FORM = {
 export default function Calendar() {
   const calendarRef = useRef(null)
   const { appointments, selectedDate, setSelectedDate, addAppointment,
-    completeAppointment, cancelAppointment, deleteAppointment } = useCalendarStore()
+    completeAppointment, cancelAppointment, deleteAppointment,
+    fetchAppointments } = useCalendarStore()
+
+  useEffect(() => { fetchAppointments() }, [])
   const [currentView, setCurrentView] = useState('dayGridMonth')
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
@@ -112,11 +115,18 @@ export default function Calendar() {
     setModalOpen(true)
   }
 
-  const handleSave = () => {
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
     if (!form.titulo.trim()) return
-    addAppointment(form)
-    setModalOpen(false)
-    setForm(EMPTY_FORM)
+    setSaving(true)
+    try {
+      await addAppointment(form)
+      setModalOpen(false)
+      setForm(EMPTY_FORM)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -276,6 +286,7 @@ export default function Calendar() {
         setForm={setForm}
         onSave={handleSave}
         editMode={!!editTarget}
+        saving={saving}
       />
     </div>
   )
@@ -393,7 +404,7 @@ function AppointmentItem({ appt, onEdit, onComplete, onCancel }) {
 
 /* ─── Appointment modal ───────────────────────────── */
 
-function AppointmentModal({ open, onClose, form, setForm, onSave, editMode }) {
+function AppointmentModal({ open, onClose, form, setForm, onSave, editMode, saving }) {
   const { leads } = useLeadsStore()
   const [showLeadDropdown, setShowLeadDropdown] = useState(false)
 
@@ -426,8 +437,8 @@ function AppointmentModal({ open, onClose, form, setForm, onSave, editMode }) {
       footer={
         <>
           <Button variant="secondary" size="md" onClick={onClose}>Cancelar</Button>
-          <Button variant="primary" size="md" onClick={onSave} disabled={hasErrors}>
-            {editMode ? 'Salvar alterações' : 'Criar compromisso'}
+          <Button variant="primary" size="md" onClick={onSave} disabled={hasErrors || saving}>
+            {saving ? 'Salvando...' : editMode ? 'Salvar alterações' : 'Criar compromisso'}
           </Button>
         </>
       }
