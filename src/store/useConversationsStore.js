@@ -155,7 +155,8 @@ export const useConversationsStore = create((set, get) => ({
     if (existing) supabase.removeChannel(existing)
 
     const channel = supabase
-      .channel(`messages:${conversationId}`)
+      .channel(`inbox:${conversationId}`)
+      // Novas mensagens (n8n insere com role='contact' ou role='bot')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -165,8 +166,7 @@ export const useConversationsStore = create((set, get) => ({
         const msg = mapMsg(payload.new)
         set((s) => {
           const current = s.messages[conversationId] || []
-          const alreadyExists = current.some((m) => m.id === msg.id)
-          if (alreadyExists) return {}
+          if (current.some((m) => m.id === msg.id)) return {}
           return {
             messages: {
               ...s.messages,
@@ -174,6 +174,19 @@ export const useConversationsStore = create((set, get) => ({
             },
           }
         })
+      })
+      // Atualiza last_message na lista quando n8n atualiza a conversa
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+        filter: `id=eq.${conversationId}`,
+      }, (payload) => {
+        set((s) => ({
+          conversations: s.conversations.map((c) =>
+            c.id === conversationId ? { ...c, ...payload.new } : c,
+          ),
+        }))
       })
       .subscribe()
 
@@ -194,15 +207,21 @@ export const useConversationsStore = create((set, get) => ({
 }))
 
 function mapMsg(row) {
+  // role='user'    → operador CRM respondendo  → bolha direita (sainte)
+  // role='contact' → mensagem do paciente/lead → bolha esquerda (entrante)
+  // role='bot'     → resposta automática       → bolha esquerda (entrante)
   return {
     id: row.id,
     conteudo: row.conteudo,
     contenido: row.conteudo,
     role: row.role,
-    tipo: row.tipo,
+    tipo: row.tipo || 'texto',
     arquivo_url: row.arquivo_url,
     arquivo_nome: row.arquivo_nome,
     preview: row.arquivo_url,
+    sender_name: row.sender_name || null,
+    sender_avatar: row.sender_avatar || null,
+    platform_message_id: row.platform_message_id || null,
     direccion: row.role === 'user' ? 'saliente' : 'entrante',
     enviado_en: row.created_at,
     created_at: row.created_at,
