@@ -75,6 +75,18 @@ export default function Calendar() {
   const [form, setForm] = useState(EMPTY_FORM)
   const lastClickRef = useRef({ date: null, time: 0 })
 
+  const CELL_COLORS = [
+    'rgba(245,166,35,0.13)',
+    'rgba(52,152,219,0.13)',
+    'rgba(155,89,182,0.13)',
+    'rgba(46,204,113,0.13)',
+  ]
+
+  /* Days that have at least one appointment */
+  const appointmentDates = new Set(
+    appointments.map((a) => a.inicio.slice(0, 10))
+  )
+
   /* Convert appointments → FullCalendar events */
   const events = appointments.map((a) => ({
     id: a.id,
@@ -197,6 +209,14 @@ export default function Calendar() {
               right: '',
             }}
             events={events}
+            displayEventTime={false}
+            dayCellDidMount={(arg) => {
+              const dateStr = arg.date.toISOString().split('T')[0]
+              if (appointmentDates.has(dateStr)) {
+                const idx = arg.date.getDate() % 4
+                arg.el.style.backgroundColor = CELL_COLORS[idx]
+              }
+            }}
             selectable
             dateClick={(info) => {
               const now = Date.now()
@@ -372,7 +392,6 @@ function AppointmentItem({ appt, onEdit, onComplete, onCancel, onDelete }) {
         </div>
 
         <div className="flex items-center gap-2 mt-1.5">
-          <Badge channel={appt.canal} className="!px-1.5 !py-0 !text-[10px]" />
           {appt.criado_por === 'bot' && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-medium"
