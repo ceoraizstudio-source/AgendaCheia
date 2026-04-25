@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -22,8 +22,10 @@ const filters = [
 ]
 
 export default function Pipeline() {
-  const { leads, moveLead } = useLeadsStore()
+  const { leads, loading, moveLead, fetchLeads } = useLeadsStore()
   const [activeFilter, setActiveFilter] = useState('all')
+
+  useEffect(() => { fetchLeads() }, [])
   const [activeStage, setActiveStage] = useState('in_progress')
   const [draggingId, setDraggingId] = useState(null)
 

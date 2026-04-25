@@ -1,3 +1,18 @@
+-- ─── Drop existing policies (safe re-run) ─────────────
+do $$ begin
+  -- profiles
+  drop policy if exists "Users can view own profile" on public.profiles;
+  drop policy if exists "Users can update own profile" on public.profiles;
+  -- leads
+  drop policy if exists "Users manage own leads" on public.leads;
+  -- conversations
+  drop policy if exists "Users manage own conversations" on public.conversations;
+  -- messages
+  drop policy if exists "Users manage own messages" on public.messages;
+  -- appointments
+  drop policy if exists "Users manage own appointments" on public.appointments;
+end $$;
+
 -- ─── Profiles (linked to auth.users) ─────────────────
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
@@ -97,6 +112,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists leads_updated_at on public.leads;
 create trigger leads_updated_at
   before update on public.leads
   for each row execute procedure public.handle_updated_at();
@@ -110,11 +126,13 @@ begin
     new.id,
     new.raw_user_meta_data->>'full_name',
     new.email
-  );
+  )
+  on conflict (id) do nothing;
   return new;
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();

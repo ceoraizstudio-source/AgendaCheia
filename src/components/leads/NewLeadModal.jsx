@@ -36,8 +36,10 @@ export default function NewLeadModal() {
   const { addLead } = useLeadsStore()
   const [form, setForm] = useState(INITIAL)
   const [errors, setErrors] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
-  const set = (field, value) => {
+  const setField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))
     setErrors((prev) => ({ ...prev, [field]: undefined }))
   }
@@ -52,33 +54,27 @@ export default function NewLeadModal() {
     return e
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
-
-    addLead({
-      id: `lead-${Date.now()}`,
-      nombre: form.nombre.trim(),
-      contacto: form.contacto.trim(),
-      email: form.email.trim(),
-      telefone: form.telefone.trim(),
-      canal_origen: form.canal_origen,
-      valor_estimado: form.valor_estimado ? Number(form.valor_estimado) : null,
-      pipeline_stage: form.pipeline_stage,
-      notas: form.notas.trim(),
-      avatar: null,
-      actualizado_en: new Date().toISOString(),
-      badge: 'Novo',
-    })
-
-    setForm(INITIAL)
-    setErrors({})
-    closeNewLead()
+    setSaving(true)
+    setSaveError('')
+    try {
+      await addLead(form)
+      setForm(INITIAL)
+      setErrors({})
+      closeNewLead()
+    } catch (err) {
+      setSaveError('Erro ao salvar. Tente novamente.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleClose = () => {
     setForm(INITIAL)
     setErrors({})
+    setSaveError('')
     closeNewLead()
   }
 
@@ -90,11 +86,11 @@ export default function NewLeadModal() {
       width={520}
       footer={
         <>
-          <Button variant="secondary" size="md" onClick={handleClose}>
+          <Button variant="secondary" size="md" onClick={handleClose} disabled={saving}>
             Cancelar
           </Button>
-          <Button variant="primary" size="md" onClick={handleSave}>
-            Salvar Lead
+          <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
+            {saving ? 'Salvando...' : 'Salvar Lead'}
           </Button>
         </>
       }
@@ -106,14 +102,14 @@ export default function NewLeadModal() {
             <Input
               placeholder="Ex: Nova Dynamics"
               value={form.nombre}
-              onChange={(e) => set('nombre', e.target.value)}
+              onChange={(e) => setField('nombre', e.target.value)}
             />
           </Field>
           <Field label="Nome do Contato">
             <Input
               placeholder="Ex: João Silva"
               value={form.contacto}
-              onChange={(e) => set('contacto', e.target.value)}
+              onChange={(e) => setField('contacto', e.target.value)}
             />
           </Field>
         </div>
@@ -125,14 +121,14 @@ export default function NewLeadModal() {
               type="email"
               placeholder="contato@empresa.com"
               value={form.email}
-              onChange={(e) => set('email', e.target.value)}
+              onChange={(e) => setField('email', e.target.value)}
             />
           </Field>
           <Field label="Telefone">
             <Input
               placeholder="+55 11 9 0000-0000"
               value={form.telefone}
-              onChange={(e) => set('telefone', e.target.value)}
+              onChange={(e) => setField('telefone', e.target.value)}
             />
           </Field>
         </div>
@@ -142,7 +138,7 @@ export default function NewLeadModal() {
           <Field label="Canal de Origem">
             <Select
               value={form.canal_origen}
-              onChange={(v) => set('canal_origen', v)}
+              onChange={(v) => setField('canal_origen', v)}
               options={CANAIS}
             />
           </Field>
@@ -150,7 +146,7 @@ export default function NewLeadModal() {
             <Input
               placeholder="Ex: 45000"
               value={form.valor_estimado}
-              onChange={(e) => set('valor_estimado', e.target.value)}
+              onChange={(e) => setField('valor_estimado', e.target.value)}
             />
           </Field>
         </div>
@@ -159,7 +155,7 @@ export default function NewLeadModal() {
         <Field label="Etapa do Funil">
           <Select
             value={form.pipeline_stage}
-            onChange={(v) => set('pipeline_stage', v)}
+            onChange={(v) => setField('pipeline_stage', v)}
             options={ETAPAS}
           />
         </Field>
@@ -170,7 +166,7 @@ export default function NewLeadModal() {
             rows={3}
             placeholder="Observações sobre o lead..."
             value={form.notas}
-            onChange={(e) => set('notas', e.target.value)}
+            onChange={(e) => setField('notas', e.target.value)}
             className="w-full rounded-[10px] px-3.5 py-2.5 text-[14px] resize-none outline-none transition-colors"
             style={{
               backgroundColor: 'var(--color-bg-elevated)',
@@ -181,6 +177,12 @@ export default function NewLeadModal() {
             onBlur={(e) => { e.target.style.borderColor = 'var(--color-border)' }}
           />
         </Field>
+
+        {saveError && (
+          <p className="text-[12px] font-medium" style={{ color: 'var(--color-danger)' }}>
+            {saveError}
+          </p>
+        )}
       </div>
     </Modal>
   )
@@ -189,10 +191,7 @@ export default function NewLeadModal() {
 function Field({ label, error, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label
-        className="text-[12px] font-medium"
-        style={{ color: 'var(--color-text-secondary)' }}
-      >
+      <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
         {label}
       </label>
       {children}
