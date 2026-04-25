@@ -63,8 +63,12 @@ export default function Calendar() {
   const { appointments, selectedDate, setSelectedDate, addAppointment,
     completeAppointment, cancelAppointment, deleteAppointment,
     fetchAppointments } = useCalendarStore()
+  const { fetchLeads } = useLeadsStore()
 
-  useEffect(() => { fetchAppointments() }, [])
+  useEffect(() => {
+    fetchAppointments()
+    fetchLeads()
+  }, [])
   const [currentView, setCurrentView] = useState('dayGridMonth')
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
@@ -582,29 +586,6 @@ function AppointmentModal({ open, onClose, form, setForm, onSave, editMode, savi
           />
         </Field>
 
-        {/* Google Calendar sync */}
-        <label
-          className="flex items-center gap-3 cursor-pointer py-2 px-3 rounded-[10px] transition-colors hover:bg-white/3"
-          style={{ border: '1px solid var(--color-border)' }}
-        >
-          <div
-            className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: form.google_sync ? 'var(--color-accent)' : 'var(--color-bg-elevated)',
-              border: `1px solid ${form.google_sync ? 'var(--color-accent)' : 'var(--color-border)'}`,
-            }}
-            onClick={() => set('google_sync', !form.google_sync)}
-          >
-            {form.google_sync && (
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </div>
-          <span className="text-[13px]" style={{ color: 'var(--color-text-secondary)' }}>
-            Sincronizar com Google Calendar
-          </span>
-        </label>
       </div>
     </Modal>
   )
