@@ -50,14 +50,21 @@ function timeAgoShort(iso) {
 /* ─── Messaging page ──────────────────────────────── */
 
 export default function Messaging() {
-  const { conversations, activeId, setActive } = useConversationsStore()
+  const { conversations, activeId, setActive, fetchConversations, subscribeRealtime, unsubscribeRealtime } = useConversationsStore()
   const [search, setSearch] = useState('')
 
+  useEffect(() => {
+    fetchConversations()
+    return () => unsubscribeRealtime()
+  }, [])
+
+  useEffect(() => {
+    if (activeId) subscribeRealtime(activeId)
+  }, [activeId])
+
   const filtered = search.trim()
-    ? conversations.filter(
-        (c) =>
-          c.lead_name.toLowerCase().includes(search.toLowerCase()) ||
-          c.empresa.toLowerCase().includes(search.toLowerCase()),
+    ? conversations.filter((c) =>
+        (c.lead_name || '').toLowerCase().includes(search.toLowerCase()),
       )
     : conversations
 
@@ -103,14 +110,22 @@ export default function Messaging() {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
-          {filtered.map((conv) => (
-            <ConversationItem
-              key={conv.id}
-              conv={conv}
-              active={conv.id === activeId}
-              onClick={() => setActive(conv.id)}
-            />
-          ))}
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full gap-2 px-4 text-center py-12">
+              <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+                Nenhuma conversa ainda.
+              </p>
+            </div>
+          ) : (
+            filtered.map((conv) => (
+              <ConversationItem
+                key={conv.id}
+                conv={conv}
+                active={conv.id === activeId}
+                onClick={() => setActive(conv.id)}
+              />
+            ))
+          )}
         </div>
       </aside>
 
@@ -154,7 +169,7 @@ function ConversationItem({ conv, active, onClick }) {
             {conv.lead_name}
           </span>
           <span className="text-[11px] shrink-0" style={{ color: 'var(--color-text-muted)' }}>
-            {msgTime(conv.last_time)}
+            {msgTime(conv.last_at)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-2">
@@ -339,7 +354,7 @@ function ChatWindow() {
             <p className="text-[14px] font-semibold leading-none mb-0.5">{conv.lead_name}</p>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                {conv.online ? 'Online agora' : timeAgoShort(conv.last_time)}
+                {conv.online ? 'Online agora' : timeAgoShort(conv.last_at)}
               </span>
               <Badge channel={conv.canal} className="!px-1.5 !py-0 !text-[10px]" />
             </div>
