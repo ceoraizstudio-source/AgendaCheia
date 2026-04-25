@@ -32,7 +32,7 @@ create policy "Users can update own profile" on public.profiles
 create table if not exists public.leads (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
-  empresa text not null,
+  nome text not null,
   contato text,
   email text,
   telefone text,

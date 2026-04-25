@@ -23,7 +23,7 @@ export const useLeadsStore = create((set, get) => ({
       .from('leads')
       .insert({
         user_id: user.id,
-        empresa: form.nombre.trim(),
+        nome: form.nombre.trim(),
         email: form.email?.trim() || null,
         telefone: form.telefone?.trim() || null,
         canal: form.canal_origen || 'manual',
@@ -62,7 +62,7 @@ export const useLeadsStore = create((set, get) => ({
 function mapRow(row) {
   return {
     id: row.id,
-    nombre: row.empresa,
+    nombre: row.nome,
     contacto: row.contato,
     email: row.email,
     telefone: row.telefone,
