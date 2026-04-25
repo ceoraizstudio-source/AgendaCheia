@@ -632,7 +632,7 @@ function LeadDetail() {
         <div className="text-center">
           <h2 className="text-[16px]">{conv.lead_name}</h2>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-            {conv.cargo} at {conv.empresa}
+            {conv.canal}
           </p>
         </div>
         <div className="flex gap-2 w-full">
@@ -661,62 +661,17 @@ function LeadDetail() {
 
       {/* Sections */}
       <div className="flex flex-col gap-5 px-5 py-5">
-        {/* Stage */}
-        <Section label="Etapa">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] font-medium">{conv.stage}</span>
-            <span
-              className="text-[15px] font-heading"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              R$ {(conv.valor_estimado / 1000).toFixed(0)}k
-            </span>
-          </div>
-        </Section>
-
         {/* Information */}
         <Section label="Informações">
           <div className="flex flex-col gap-2">
-            <InfoRow label="E-mail" value={conv.email} />
-            <InfoRow label="Telefone" value={conv.telefone} />
-            <InfoRow label="Origem" value={conv.fonte} />
-            <InfoRow label="Fuso horário" value={conv.timezone} />
+            <InfoRow label="Canal" value={conv.canal} />
+            <InfoRow label="Modo" value={conv.modo === 'bot' ? 'Bot ativo' : 'Humano'} />
+            <InfoRow label="Última mensagem" value={conv.last_message} />
           </div>
         </Section>
 
-        {/* Tags */}
-        <Section label="Tags">
-          <div className="flex flex-wrap gap-1.5">
-            {conv.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium"
-                style={{
-                  backgroundColor: 'var(--color-accent-muted)',
-                  color: 'var(--color-accent)',
-                  border: '1px solid rgba(245,166,35,0.2)',
-                }}
-              >
-                <Tag size={10} strokeWidth={2} />
-                {tag}
-              </span>
-            ))}
-            <button
-              className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium cursor-pointer"
-              style={{
-                backgroundColor: 'transparent',
-                color: 'var(--color-text-muted)',
-                border: '1px dashed var(--color-border)',
-              }}
-            >
-              <Plus size={10} strokeWidth={2} />
-              Adicionar
-            </button>
-          </div>
-        </Section>
-
-        {/* Channel */}
-        <Section label="Canal">
+        {/* Channel badge */}
+        <Section label="Canal de origem">
           <Badge channel={conv.canal} />
         </Section>
       </div>
