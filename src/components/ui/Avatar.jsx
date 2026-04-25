@@ -15,7 +15,7 @@ export default function Avatar({
   online = false,
   className = '',
 }) {
-  const initials = name
+  const initials = (name || '')
     .split(' ')
     .map((n) => n[0])
     .filter(Boolean)

@@ -281,7 +281,7 @@ function DealCard({ lead, hidden }) {
 
       <div className="flex items-center justify-between gap-2 pt-1">
         <div className="flex items-center gap-2">
-          <Avatar src={lead.avatar} name={lead.contacto} size="xs" />
+          <Avatar src={lead.avatar} name={lead.nombre || ''} size="xs" />
           <span
             className="text-[11px]"
             style={{ color: 'var(--color-text-muted)' }}
