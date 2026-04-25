@@ -65,7 +65,7 @@ export default function NewLeadModal() {
       setErrors({})
       closeNewLead()
     } catch (err) {
-      setSaveError('Erro ao salvar. Tente novamente.')
+      setSaveError(err?.message || 'Erro ao salvar. Tente novamente.')
     } finally {
       setSaving(false)
     }
