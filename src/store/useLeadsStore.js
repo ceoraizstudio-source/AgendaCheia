@@ -24,7 +24,6 @@ export const useLeadsStore = create((set, get) => ({
       .insert({
         user_id: user.id,
         empresa: form.nombre.trim(),
-        contato: form.contacto?.trim() || null,
         email: form.email?.trim() || null,
         telefone: form.telefone?.trim() || null,
         canal: form.canal_origen || 'manual',

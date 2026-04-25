@@ -22,7 +22,6 @@ const ETAPAS = [
 
 const INITIAL = {
   nombre: '',
-  contacto: '',
   email: '',
   telefone: '',
   canal_origen: 'instagram',
@@ -96,23 +95,14 @@ export default function NewLeadModal() {
       }
     >
       <div className="flex flex-col gap-5">
-        {/* Empresa / Lead */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Empresa / Lead *" error={errors.nombre}>
-            <Input
-              placeholder="Ex: Nova Dynamics"
-              value={form.nombre}
-              onChange={(e) => setField('nombre', e.target.value)}
-            />
-          </Field>
-          <Field label="Nome do Contato">
-            <Input
-              placeholder="Ex: João Silva"
-              value={form.contacto}
-              onChange={(e) => setField('contacto', e.target.value)}
-            />
-          </Field>
-        </div>
+        {/* Nome completo */}
+        <Field label="Nome Completo *" error={errors.nombre}>
+          <Input
+            placeholder="Ex: João Silva"
+            value={form.nombre}
+            onChange={(e) => setField('nombre', e.target.value)}
+          />
+        </Field>
 
         {/* Email + Telefone */}
         <div className="grid grid-cols-2 gap-4">
