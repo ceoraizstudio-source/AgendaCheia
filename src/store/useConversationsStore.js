@@ -222,7 +222,7 @@ function mapMsg(row) {
     sender_name: row.sender_name || null,
     sender_avatar: row.sender_avatar || null,
     platform_message_id: row.platform_message_id || null,
-    direccion: row.role === 'user' ? 'saliente' : 'entrante',
+    direccion: (row.role === 'user' || row.role === 'bot') ? 'saliente' : 'entrante',
     enviado_en: row.created_at,
     created_at: row.created_at,
   }
