@@ -3,11 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Build-time args (Vite bakes these into the bundle at build)
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+# Supabase self-hosted — valores embutidos no bundle (anon key é pública)
+ENV VITE_SUPABASE_URL=https://agenda-cheia-supabase.0fkaky.easypanel.host
+ENV VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzE0NTIxNjAwLCJleHAiOjE4OTM0NTYwMDB9.zIVutvqZvK0zpij8V1v5KboZdgQ334tWB29caZjZgCw
 
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
