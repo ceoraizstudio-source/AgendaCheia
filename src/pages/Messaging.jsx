@@ -2,13 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Search,
   Plus,
-  Phone,
-  Video,
   MoreHorizontal,
   Paperclip,
   Smile,
   Send,
-  Tag,
+  Trash2,
   FileText,
 } from 'lucide-react'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
@@ -282,15 +280,25 @@ function EmojiPicker({ onSelect, onClose }) {
 /* ─── Chat window ─────────────────────────────────── */
 
 function ChatWindow() {
-  const { conversations, messages, activeId, toggleModo, sendMessage, sendFile } =
+  const { conversations, messages, activeId, toggleModo, sendMessage, sendFile, deleteConversation } =
     useConversationsStore()
   const conv = conversations.find((c) => c.id === activeId)
   const msgs = messages[activeId] || []
   const [text, setText] = useState('')
   const [showEmoji, setShowEmoji] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef(null)
   const bottomRef = useRef(null)
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -368,15 +376,39 @@ function ChatWindow() {
             label={conv.modo === 'bot' ? 'Bot ativo' : 'Humano'}
           />
           <div className="w-px h-5 mx-1" style={{ backgroundColor: 'var(--color-border)' }} />
-          {[Phone, Video, MoreHorizontal].map((Icon, i) => (
+          <div className="relative" ref={menuRef}>
             <button
-              key={i}
+              onClick={() => setShowMenu(s => !s)}
               className="w-8 h-8 flex items-center justify-center rounded-[8px] cursor-pointer hover:bg-white/5"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              <Icon size={16} strokeWidth={1.5} />
+              <MoreHorizontal size={16} strokeWidth={1.5} />
             </button>
-          ))}
+            {showMenu && (
+              <div
+                className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-[10px] overflow-hidden shadow-xl py-1"
+                style={{
+                  width: 180,
+                  backgroundColor: 'var(--color-bg-elevated)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    if (confirm('Apagar esta conversa? Esta ação não pode ser desfeita.')) {
+                      deleteConversation(conv.id)
+                    }
+                    setShowMenu(false)
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] cursor-pointer hover:bg-white/5 transition-colors"
+                  style={{ color: 'var(--color-danger)' }}
+                >
+                  <Trash2 size={14} strokeWidth={1.5} />
+                  Apagar conversa
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

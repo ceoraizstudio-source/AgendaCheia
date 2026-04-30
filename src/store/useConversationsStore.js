@@ -201,6 +201,18 @@ export const useConversationsStore = create((set, get) => ({
     }
   },
 
+  deleteConversation: async (id) => {
+    const remaining = get().conversations.filter((c) => c.id !== id)
+    const newActive = remaining.length > 0 ? remaining[0].id : null
+    set((s) => {
+      const msgs = { ...s.messages }
+      delete msgs[id]
+      return { conversations: remaining, activeId: newActive, messages: msgs }
+    })
+    if (newActive) get().fetchMessages(newActive)
+    await supabase.from('conversations').delete().eq('id', id)
+  },
+
   get activeConversation() {
     return get().conversations.find((c) => c.id === get().activeId) || null
   },
