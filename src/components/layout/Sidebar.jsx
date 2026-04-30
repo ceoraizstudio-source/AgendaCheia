@@ -10,18 +10,23 @@ import {
 } from 'lucide-react'
 import Button from '../ui/Button'
 import { useUIStore } from '../../store/useUIStore'
+import { useConversationsStore } from '../../store/useConversationsStore'
 
 const navItems = [
-  { to: '/pipeline', label: 'Funil', icon: LayoutGrid },
-  { to: '/messaging', label: 'Mensagens', icon: MessageSquare },
-  { to: '/calendar', label: 'Agenda', icon: CalendarIcon },
-  { to: '/analytics', label: 'Análises', icon: BarChart3 },
-  { to: '/campaigns', label: 'Campanhas', icon: Megaphone },
-  { to: '/settings', label: 'Configurações', icon: SettingsIcon },
+  { to: '/pipeline',   label: 'Funil',         icon: LayoutGrid   },
+  { to: '/messaging',  label: 'Mensagens',      icon: MessageSquare, badge: true },
+  { to: '/calendar',   label: 'Agenda',         icon: CalendarIcon },
+  { to: '/analytics',  label: 'Análises',       icon: BarChart3    },
+  { to: '/campaigns',  label: 'Campanhas',      icon: Megaphone    },
+  { to: '/settings',   label: 'Configurações',  icon: SettingsIcon },
 ]
 
 export default function Sidebar() {
   const { openNewLead } = useUIStore()
+  const conversations = useConversationsStore(s => s.conversations)
+
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unread || 0), 0)
+
   return (
     <aside
       className="flex flex-col shrink-0 h-screen sticky top-0"
@@ -48,7 +53,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-2 flex flex-col gap-1">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, label, icon: Icon, badge }) => (
           <NavLink
             key={to}
             to={to}
@@ -69,7 +74,15 @@ export default function Sidebar() {
             }
           >
             <Icon size={18} strokeWidth={1.5} />
-            {label}
+            <span className="flex-1">{label}</span>
+            {badge && totalUnread > 0 && (
+              <span
+                className="flex items-center justify-center rounded-full text-[11px] font-bold min-w-[18px] h-[18px] px-1"
+                style={{ backgroundColor: 'var(--color-accent)', color: '#000' }}
+              >
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
