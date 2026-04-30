@@ -6,6 +6,7 @@ export const useConversationsStore = create((set, get) => ({
   messages: {},
   activeId: null,
   realtimeChannel: null,
+  globalChannel: null,
 
   fetchConversations: async () => {
     const { data, error } = await supabase
@@ -16,6 +17,8 @@ export const useConversationsStore = create((set, get) => ({
       set({ conversations: data, activeId: data[0].id })
       get().fetchMessages(data[0].id)
     }
+    // Inicia escuta global de todas as conversas
+    get().subscribeGlobal()
   },
 
   fetchMessages: async (conversationId) => {
@@ -199,6 +202,41 @@ export const useConversationsStore = create((set, get) => ({
       supabase.removeChannel(channel)
       set({ realtimeChannel: null })
     }
+  },
+
+  // Escuta TODAS as conversas para atualizar badges e lista em tempo real
+  subscribeGlobal: () => {
+    const existing = get().globalChannel
+    if (existing) supabase.removeChannel(existing)
+
+    const channel = supabase
+      .channel('global:conversations')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+      }, (payload) => {
+        set((s) => ({
+          conversations: s.conversations
+            .map((c) => c.id === payload.new.id ? { ...c, ...payload.new } : c)
+            .sort((a, b) => new Date(b.last_at) - new Date(a.last_at)),
+        }))
+      })
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conversations',
+      }, (payload) => {
+        set((s) => {
+          if (s.conversations.some((c) => c.id === payload.new.id)) return {}
+          return {
+            conversations: [payload.new, ...s.conversations],
+          }
+        })
+      })
+      .subscribe()
+
+    set({ globalChannel: channel })
   },
 
   deleteConversation: async (id) => {
