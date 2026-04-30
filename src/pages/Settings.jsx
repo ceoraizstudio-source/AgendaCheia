@@ -391,12 +391,51 @@ function WebhookRow({ label, url }) {
 
 /* ─── Tab Agente IA ───────────────────────────────── */
 function TabAgente() {
-  const [botName,     setBotName]     = useState('Assistente Agenda Cheia')
-  const [prompt,      setPrompt]      = useState('Você é um assistente de vendas profissional da Agenda Cheia. Seu objetivo é qualificar leads, responder dúvidas sobre nossos serviços e agendar reuniões com o time de vendas. Seja sempre cordial, objetivo e profissional.')
-  const [fueraHorario, setFueraHorario] = useState(true)
-  const [escalar,     setEscalar]     = useState(true)
-  const [horaInicio,  setHoraInicio]  = useState('08:00')
-  const [horaFim,     setHoraFim]     = useState('18:00')
+  const { integrations, loading, saving, fetchIntegrations, saveIntegrations } = useIntegrationsStore()
+
+  const [botName,          setBotName]          = useState('Assistente Agenda Cheia')
+  const [prompt,           setPrompt]           = useState('Você é um assistente de vendas profissional da Agenda Cheia. Seu objetivo é qualificar leads, responder dúvidas sobre nossos serviços e agendar reuniões com o time de vendas. Seja sempre cordial, objetivo e profissional.')
+  const [fueraHorario,     setFueraHorario]     = useState(true)
+  const [escalar,          setEscalar]          = useState(true)
+  const [horaInicio,       setHoraInicio]       = useState('08:00')
+  const [horaFim,          setHoraFim]          = useState('18:00')
+  const [geminiKey,        setGeminiKey]        = useState('')
+  const [showGeminiKey,    setShowGeminiKey]    = useState(false)
+  const [saved,            setSaved]            = useState(false)
+
+  useEffect(() => { fetchIntegrations() }, [])
+
+  useEffect(() => {
+    if (!integrations) return
+    setBotName(integrations.bot_name              || 'Assistente Agenda Cheia')
+    setPrompt(integrations.bot_prompt             || '')
+    setFueraHorario(integrations.bot_respond_after_hours ?? true)
+    setEscalar(integrations.bot_escalate_human    ?? true)
+    setHoraInicio(integrations.bot_schedule_start || '08:00')
+    setHoraFim(integrations.bot_schedule_end      || '18:00')
+    setGeminiKey(integrations.gemini_api_key      || '')
+  }, [integrations])
+
+  const handleSave = async () => {
+    const ok = await saveIntegrations({
+      bot_name: botName,
+      bot_prompt: prompt,
+      bot_respond_after_hours: fueraHorario,
+      bot_escalate_human: escalar,
+      bot_schedule_start: horaInicio,
+      bot_schedule_end: horaFim,
+      ...(geminiKey ? { gemini_api_key: geminiKey } : {}),
+    })
+    if (ok) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-text-muted)' }} />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -405,7 +444,7 @@ function TabAgente() {
 
         <div className="flex flex-col gap-1.5">
           <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Nome do Bot</label>
-          <Input value={botName} onChange={e => setBotName(e.target.value)} placeholder="Ex: Assistente Agenda Cheia" />
+          <Input value={botName} onChange={e => setBotName(e.target.value)} placeholder="Ex: Ana, Assistente Virtual..." />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -413,14 +452,41 @@ function TabAgente() {
             Prompt / Instruções do Bot
           </label>
           <textarea
-            rows={6} value={prompt} onChange={e => setPrompt(e.target.value)}
-            placeholder="Descreva como o bot deve se comportar..."
+            rows={7} value={prompt} onChange={e => setPrompt(e.target.value)}
+            placeholder="Descreva como o bot deve se comportar, quais serviços oferece, tom de voz, etc..."
             className="w-full rounded-[10px] px-3.5 py-3 text-[14px] resize-none outline-none transition-colors leading-relaxed"
             style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
             onFocus={e => { e.target.style.borderColor = 'var(--color-border-focus)' }}
             onBlur={e => { e.target.style.borderColor = 'var(--color-border)' }}
           />
           <span className="text-[11px] text-right" style={{ color: 'var(--color-text-muted)' }}>{prompt.length} caracteres</span>
+        </div>
+
+        {/* Gemini API Key */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            Gemini API Key
+          </label>
+          <div className="relative">
+            <Input
+              type={showGeminiKey ? 'text' : 'password'}
+              placeholder="AIzaSy..."
+              value={geminiKey}
+              onChange={e => setGeminiKey(e.target.value)}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowGeminiKey(s => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              {showGeminiKey ? <EyeOff size={15} strokeWidth={1.5} /> : <Eye size={15} strokeWidth={1.5} />}
+            </button>
+          </div>
+          <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+            Obtenha sua chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>aistudio.google.com</a>
+          </span>
         </div>
 
         <div className="flex flex-col gap-4 pt-2" style={{ borderTop: '1px solid var(--color-border)' }}>
@@ -457,8 +523,17 @@ function TabAgente() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button variant="primary" size="md">Salvar Configurações</Button>
+        <div className="flex items-center justify-between">
+          {saved && (
+            <span className="text-[12px] flex items-center gap-1.5" style={{ color: 'var(--color-success)' }}>
+              <CheckCircle size={13} strokeWidth={2} /> Salvo com sucesso
+            </span>
+          )}
+          <div className="ml-auto">
+            <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
+              {saving ? 'Salvando...' : 'Salvar Configurações'}
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
