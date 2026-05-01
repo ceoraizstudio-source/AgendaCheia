@@ -63,7 +63,8 @@ export default function Services() {
     Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex justify-center">
+    <div className="flex flex-col gap-6 w-full max-w-3xl">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -222,6 +223,7 @@ export default function Services() {
           ))}
         </div>
       )}
+    </div>
     </div>
   )
 }
