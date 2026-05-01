@@ -448,18 +448,33 @@ function TabAgente() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-            Prompt / Instruções do Bot
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              System Prompt — Personalidade do Agente
+            </label>
+          </div>
           <textarea
-            rows={7} value={prompt} onChange={e => setPrompt(e.target.value)}
-            placeholder="Descreva como o bot deve se comportar, quais serviços oferece, tom de voz, etc..."
-            className="w-full rounded-[10px] px-3.5 py-3 text-[14px] resize-none outline-none transition-colors leading-relaxed"
+            rows={10} value={prompt} onChange={e => setPrompt(e.target.value)}
+            placeholder={`Você é um assistente cordial da [sua clínica/empresa].
+
+Seu objetivo é:
+- Responder dúvidas sobre nossos serviços
+- Apresentar os serviços disponíveis quando o cliente perguntar
+- Agendar consultas quando o cliente quiser
+
+Tom: profissional e acolhedor. Responda de forma breve e natural, como no WhatsApp.`}
+            className="w-full rounded-[10px] px-3.5 py-3 text-[14px] resize-none outline-none transition-colors leading-relaxed font-mono"
             style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
             onFocus={e => { e.target.style.borderColor = 'var(--color-border-focus)' }}
             onBlur={e => { e.target.style.borderColor = 'var(--color-border)' }}
           />
-          <span className="text-[11px] text-right" style={{ color: 'var(--color-text-muted)' }}>{prompt.length} caracteres</span>
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              💡 O agente adiciona automaticamente: data/hora atual, lista de serviços cadastrados e formato de resposta.
+              Você só precisa definir a personalidade e objetivos aqui.
+            </p>
+            <span className="text-[11px] shrink-0" style={{ color: 'var(--color-text-muted)' }}>{prompt.length} chars</span>
+          </div>
         </div>
 
         {/* Gemini API Key */}
