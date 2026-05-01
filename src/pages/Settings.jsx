@@ -76,8 +76,6 @@ function TabIntegracoes() {
   const [phoneId,     setPhoneId]     = useState('')
   const [businessId,  setBusinessId]  = useState('')
   const [pageId,      setPageId]      = useState('')
-  const [appId,       setAppId]       = useState('')
-  const [appSecret,   setAppSecret]   = useState('')
   const [verifyToken, setVerifyToken] = useState('agenda-cheia-2026')
   const [metaOpen,    setMetaOpen]    = useState(false)
   const [metaSaved,   setMetaSaved]   = useState(false)
@@ -98,8 +96,6 @@ function TabIntegracoes() {
     setPhoneId(integrations.whatsapp_phone_number_id || '')
     setBusinessId(integrations.whatsapp_business_id  || '')
     setPageId(integrations.instagram_page_id         || '')
-    setAppId(integrations.meta_app_id                || '')
-    setAppSecret(integrations.meta_app_secret        || '')
     setVerifyToken(integrations.meta_verify_token    || 'agenda-cheia-2026')
     setManychatKey(integrations.manychat_api_key     || '')
   }, [integrations])
@@ -110,8 +106,6 @@ function TabIntegracoes() {
       whatsapp_phone_number_id: phoneId,
       whatsapp_business_id: businessId,
       instagram_page_id: pageId,
-      meta_app_id: appId,
-      meta_app_secret: appSecret,
       meta_verify_token: verifyToken,
       meta_connected: !!metaToken && !!phoneId,
     })
@@ -224,19 +218,6 @@ function TabIntegracoes() {
                   Verify Token
                 </label>
                 <Input placeholder="agenda-cheia-2026" value={verifyToken} onChange={e => setVerifyToken(e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  App ID (Meta)
-                </label>
-                <Input placeholder="123456789012345" value={appId} onChange={e => setAppId(e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  App Secret (Meta)
-                </label>
-                <Input type="password" placeholder="••••••••••••••••••••••••••••••••"
-                  value={appSecret} onChange={e => setAppSecret(e.target.value)} />
               </div>
             </div>
 
