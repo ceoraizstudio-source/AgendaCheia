@@ -73,6 +73,7 @@ function TabIntegracoes() {
 
   // Meta fields
   const [metaToken,   setMetaToken]   = useState('')
+  const [igToken,     setIgToken]     = useState('')
   const [phoneId,     setPhoneId]     = useState('')
   const [businessId,  setBusinessId]  = useState('')
   const [pageId,      setPageId]      = useState('')
@@ -92,17 +93,19 @@ function TabIntegracoes() {
 
   useEffect(() => {
     if (!integrations) return
-    setMetaToken(integrations.meta_access_token      || '')
-    setPhoneId(integrations.whatsapp_phone_number_id || '')
-    setBusinessId(integrations.whatsapp_business_id  || '')
-    setPageId(integrations.instagram_page_id         || '')
-    setVerifyToken(integrations.meta_verify_token    || 'agenda-cheia-2026')
+    setMetaToken(integrations.meta_access_token        || '')
+    setIgToken(integrations.instagram_access_token    || '')
+    setPhoneId(integrations.whatsapp_phone_number_id  || '')
+    setBusinessId(integrations.whatsapp_business_id   || '')
+    setPageId(integrations.instagram_page_id          || '')
+    setVerifyToken(integrations.meta_verify_token     || 'agenda-cheia-2026')
     setManychatKey(integrations.manychat_api_key     || '')
   }, [integrations])
 
   const handleSaveMeta = async () => {
     const ok = await saveIntegrations({
       meta_access_token: metaToken,
+      instagram_access_token: igToken,
       whatsapp_phone_number_id: phoneId,
       whatsapp_business_id: businessId,
       instagram_page_id: pageId,
@@ -188,12 +191,19 @@ function TabIntegracoes() {
 
             {/* Credenciais */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5 col-span-2">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  Meta Access Token (Permanent)
+                  WhatsApp Token (EAAxxxxx)
                 </label>
                 <Input type="password" placeholder="EAAxxxxxxxxxxxxxxxx"
                   value={metaToken} onChange={e => setMetaToken(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  Instagram Token (IGAAxxxxx)
+                </label>
+                <Input type="password" placeholder="IGAAxxxxxxxxxxxxxxxx"
+                  value={igToken} onChange={e => setIgToken(e.target.value)} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
