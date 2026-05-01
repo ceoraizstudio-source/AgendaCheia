@@ -105,6 +105,16 @@ export const useConversationsStore = create((set, get) => ({
       await supabase.from('conversations')
         .update({ last_message: contenido, last_at: now })
         .eq('id', conversationId)
+
+      // Envia via WhatsApp (plataforma = whatsapp)
+      const conv = get().conversations.find((c) => c.id === conversationId)
+      if (conv?.platform_contact_id && (conv?.canal === 'whatsapp' || conv?.platform === 'whatsapp')) {
+        fetch('https://agent.metodoagendacheia.com.br/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, message: contenido }),
+        }).catch((err) => console.error('Falha ao enviar WhatsApp:', err))
+      }
     }
   },
 
