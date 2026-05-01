@@ -106,14 +106,17 @@ export const useConversationsStore = create((set, get) => ({
         .update({ last_message: contenido, last_at: now })
         .eq('id', conversationId)
 
-      // Envia via WhatsApp (plataforma = whatsapp)
+      // Envia via WhatsApp se a conversa tiver um contato de plataforma
       const conv = get().conversations.find((c) => c.id === conversationId)
-      if (conv?.platform_contact_id && (conv?.canal === 'whatsapp' || conv?.platform === 'whatsapp')) {
+      if (conv?.platform_contact_id) {
         fetch('https://agent.metodoagendacheia.com.br/api/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ conversationId, message: contenido }),
-        }).catch((err) => console.error('Falha ao enviar WhatsApp:', err))
+        })
+          .then(r => r.json())
+          .then(r => { if (!r.ok) console.error('Agent /api/send:', r) })
+          .catch((err) => console.error('Falha ao chamar agent:', err))
       }
     }
   },
