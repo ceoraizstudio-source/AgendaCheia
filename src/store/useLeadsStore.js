@@ -51,7 +51,27 @@ export const useLeadsStore = create((set, get) => ({
   },
 
   deleteLead: async (leadId) => {
+    // Remove do estado imediatamente
     set((s) => ({ leads: s.leads.filter((l) => l.id !== leadId) }))
+
+    // Busca conversas do lead para apagar mensagens primeiro
+    const { data: convs } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('lead_id', leadId)
+
+    if (convs?.length) {
+      const convIds = convs.map((c) => c.id)
+      // Apaga mensagens das conversas
+      await supabase.from('messages').delete().in('conversation_id', convIds)
+      // Apaga conversas
+      await supabase.from('conversations').delete().in('id', convIds)
+    }
+
+    // Apaga agendamentos do lead
+    await supabase.from('appointments').delete().eq('lead_id', leadId)
+
+    // Apaga o lead
     await supabase.from('leads').delete().eq('id', leadId)
   },
 

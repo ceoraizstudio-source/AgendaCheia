@@ -253,6 +253,10 @@ export const useConversationsStore = create((set, get) => ({
   },
 
   deleteConversation: async (id) => {
+    // Busca lead_id antes de apagar para deletar também o lead
+    const conv = get().conversations.find((c) => c.id === id)
+    const leadId = conv?.lead_id || null
+
     const remaining = get().conversations.filter((c) => c.id !== id)
     const newActive = remaining.length > 0 ? remaining[0].id : null
     set((s) => {
@@ -261,7 +265,14 @@ export const useConversationsStore = create((set, get) => ({
       return { conversations: remaining, activeId: newActive, messages: msgs }
     })
     if (newActive) get().fetchMessages(newActive)
+
+    // Apaga mensagens, conversa, agendamentos e lead em cascata
+    await supabase.from('messages').delete().eq('conversation_id', id)
     await supabase.from('conversations').delete().eq('id', id)
+    if (leadId) {
+      await supabase.from('appointments').delete().eq('lead_id', leadId)
+      await supabase.from('leads').delete().eq('id', leadId)
+    }
   },
 
   get activeConversation() {
