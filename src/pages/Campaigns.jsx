@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowUpRight, ExternalLink, Send, RefreshCw, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Users, X } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, Send, RefreshCw, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Users, X, Plus, Trash2 } from 'lucide-react'
 import { GoogleIcon, MetaIcon, EmailMarketingIcon } from '../components/ui/BrandIcons'
 import { useIntegrationsStore } from '../store/useIntegrationsStore'
 import { useLeadsStore } from '../store/useLeadsStore'
@@ -67,12 +67,13 @@ const CATEGORY_LABEL = {
 function TabTemplates() {
   const { integrations, fetchIntegrations } = useIntegrationsStore()
   const { leads, fetchLeads } = useLeadsStore()
-  const [templates, setTemplates]   = useState([])
-  const [loading, setLoading]       = useState(false)
-  const [error, setError]           = useState(null)
-  const [expanded, setExpanded]     = useState(null)
-  const [sendModal, setSendModal]   = useState(null) // template a enviar
-  const [userId, setUserId]         = useState(null)
+  const [templates, setTemplates]       = useState([])
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState(null)
+  const [expanded, setExpanded]         = useState(null)
+  const [sendModal, setSendModal]       = useState(null)
+  const [createModal, setCreateModal]   = useState(false)
+  const [userId, setUserId]             = useState(null)
 
   useEffect(() => {
     fetchIntegrations()
@@ -134,12 +135,18 @@ function TabTemplates() {
         <p className="text-[13px]" style={{ color: 'var(--color-text-secondary)' }}>
           {templates.length} template{templates.length !== 1 ? 's' : ''} encontrado{templates.length !== 1 ? 's' : ''}
         </p>
-        <button onClick={loadTemplates} disabled={loading}
-          className="flex items-center gap-2 text-[13px] cursor-pointer hover:opacity-80 transition-opacity"
-          style={{ color: 'var(--color-accent)' }}>
-          <RefreshCw size={14} strokeWidth={1.5} className={loading ? 'animate-spin' : ''} />
-          Atualizar
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={loadTemplates} disabled={loading}
+            className="flex items-center gap-2 text-[13px] cursor-pointer hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--color-text-secondary)' }}>
+            <RefreshCw size={14} strokeWidth={1.5} className={loading ? 'animate-spin' : ''} />
+            Atualizar
+          </button>
+          <Button variant="primary" size="sm" onClick={() => setCreateModal(true)}>
+            <Plus size={14} strokeWidth={2} />
+            Novo Template
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -209,6 +216,21 @@ function TabTemplates() {
                       Enviar
                     </Button>
                   )}
+                  <button
+                    onClick={async () => {
+                      if (!confirm(`Excluir template "${tpl.name}"?`)) return
+                      await fetch(`${AGENT_URL}/api/templates`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, name: tpl.name }),
+                      })
+                      loadTemplates()
+                    }}
+                    className="p-1.5 rounded-[8px] cursor-pointer hover:bg-white/5 transition-colors"
+                    style={{ color: 'var(--color-danger)' }}
+                    title="Excluir template">
+                    <Trash2 size={14} strokeWidth={1.5} />
+                  </button>
                   <button onClick={() => setExpanded(isOpen ? null : tpl.name)}
                     className="p-1.5 rounded-[8px] cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ color: 'var(--color-text-muted)' }}>
@@ -266,6 +288,15 @@ function TabTemplates() {
           leads={leads}
           userId={userId}
           onClose={() => setSendModal(null)}
+        />
+      )}
+
+      {/* Modal de criação */}
+      {createModal && (
+        <CreateTemplateModal
+          userId={userId}
+          onClose={() => setCreateModal(false)}
+          onCreated={() => { setCreateModal(false); loadTemplates() }}
         />
       )}
     </div>
@@ -440,6 +471,221 @@ function SendTemplateModal({ template, leads, userId, onClose }) {
           ) : (
             <Button variant="primary" size="sm" className="ml-auto" onClick={onClose}>Fechar</Button>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Modal de criação de template ──────────────────────────────── */
+
+const EMPTY_BUTTON = { type: 'QUICK_REPLY', text: '' }
+
+function CreateTemplateModal({ userId, onClose, onCreated }) {
+  const [name, setName]           = useState('')
+  const [category, setCategory]   = useState('MARKETING')
+  const [language, setLanguage]   = useState('pt_BR')
+  const [header, setHeader]       = useState('')
+  const [body, setBody]           = useState('')
+  const [footer, setFooter]       = useState('')
+  const [buttons, setButtons]     = useState([])
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState(null)
+
+  const addButton = () => setButtons(b => [...b, { ...EMPTY_BUTTON }])
+  const removeButton = (i) => setButtons(b => b.filter((_, idx) => idx !== i))
+  const updateButton = (i, field, value) => setButtons(b => b.map((btn, idx) => idx === i ? { ...btn, [field]: value } : btn))
+
+  const handleCreate = async () => {
+    if (!name.trim()) { setError('Nome é obrigatório'); return }
+    if (!body.trim()) { setError('Corpo (Body) é obrigatório'); return }
+    setSaving(true)
+    setError(null)
+
+    const components = []
+    if (header.trim()) components.push({ type: 'HEADER', format: 'TEXT', text: header.trim() })
+    components.push({ type: 'BODY', text: body.trim() })
+    if (footer.trim()) components.push({ type: 'FOOTER', text: footer.trim() })
+    if (buttons.filter(b => b.text.trim()).length > 0) {
+      components.push({ type: 'BUTTONS', buttons: buttons.filter(b => b.text.trim()).map(b => ({ type: b.type, text: b.text.trim() })) })
+    }
+
+    try {
+      const r = await fetch(`${AGENT_URL}/api/templates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, name, category, language, components }),
+      })
+      const data = await r.json()
+      if (!r.ok) throw new Error(data.error?.error_user_msg || data.error?.message || JSON.stringify(data))
+      onCreated()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputStyle = {
+    backgroundColor: 'var(--color-bg-elevated)',
+    border: '1px solid var(--color-border)',
+    color: 'var(--color-text-primary)',
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+      <div className="w-full max-w-2xl rounded-[16px] flex flex-col overflow-hidden"
+        style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border)', maxHeight: '92vh' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--color-border)' }}>
+          <div>
+            <p className="text-[15px] font-semibold">Novo Template WhatsApp</p>
+            <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>O template será enviado para revisão do Meta</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-[8px] cursor-pointer hover:bg-white/5"
+            style={{ color: 'var(--color-text-muted)' }}>
+            <X size={18} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          {error && (
+            <div className="rounded-[10px] px-4 py-3 text-[12px]"
+              style={{ backgroundColor: 'rgba(255,59,48,0.08)', color: 'var(--color-danger)', border: '1px solid rgba(255,59,48,0.2)' }}>
+              {error}
+            </div>
+          )}
+
+          {/* Linha 1 — Nome, Categoria, Idioma */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1.5 col-span-1">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Categoria *</label>
+              <select value={category} onChange={e => setCategory(e.target.value)}
+                className="h-10 rounded-[10px] px-3 text-[13px] outline-none cursor-pointer"
+                style={{ ...inputStyle, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239096a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: 32 }}>
+                <option value="MARKETING">Marketing</option>
+                <option value="UTILITY">Utilitário</option>
+                <option value="AUTHENTICATION">Autenticação</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5 col-span-1">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Idioma *</label>
+              <select value={language} onChange={e => setLanguage(e.target.value)}
+                className="h-10 rounded-[10px] px-3 text-[13px] outline-none cursor-pointer"
+                style={{ ...inputStyle, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239096a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: 32 }}>
+                <option value="pt_BR">Português (BR)</option>
+                <option value="en_US">English (US)</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5 col-span-1">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Nome (snake_case) *</label>
+              <input value={name} onChange={e => setName(e.target.value.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''))}
+                placeholder="boas_vindas_consulta"
+                className="h-10 rounded-[10px] px-3 text-[13px] outline-none font-mono"
+                style={inputStyle} />
+            </div>
+          </div>
+
+          {/* Header */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              Cabeçalho <span style={{ color: 'var(--color-text-muted)' }}>(opcional)</span>
+            </label>
+            <input value={header} onChange={e => setHeader(e.target.value)}
+              placeholder="Ex: Confirmação de Consulta"
+              className="h-10 rounded-[10px] px-3 text-[13px] outline-none"
+              style={inputStyle} />
+          </div>
+
+          {/* Body */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Corpo *</label>
+              <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                Use {`{{1}}`}, {`{{2}}`}... para variáveis dinâmicas
+              </span>
+            </div>
+            <textarea value={body} onChange={e => setBody(e.target.value)} rows={5}
+              placeholder={`Olá {{1}}, sua consulta está confirmada para {{2}} às {{3}}.\n\nQualquer dúvida estamos à disposição! 😊`}
+              className="rounded-[10px] px-3.5 py-3 text-[13px] outline-none resize-none leading-relaxed"
+              style={inputStyle} />
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+              {body.length}/1024 caracteres
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              Rodapé <span style={{ color: 'var(--color-text-muted)' }}>(opcional)</span>
+            </label>
+            <input value={footer} onChange={e => setFooter(e.target.value)}
+              placeholder="Ex: Responda PARAR para cancelar"
+              className="h-10 rounded-[10px] px-3 text-[13px] outline-none"
+              style={inputStyle} />
+          </div>
+
+          {/* Botões */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                Botões <span style={{ color: 'var(--color-text-muted)' }}>(opcional, máx. 3)</span>
+              </label>
+              {buttons.length < 3 && (
+                <button onClick={addButton} className="text-[12px] cursor-pointer hover:opacity-80 flex items-center gap-1"
+                  style={{ color: 'var(--color-accent)' }}>
+                  <Plus size={12} /> Adicionar botão
+                </button>
+              )}
+            </div>
+            {buttons.map((btn, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <select value={btn.type} onChange={e => updateButton(i, 'type', e.target.value)}
+                  className="h-9 rounded-[10px] px-2 text-[12px] outline-none cursor-pointer shrink-0"
+                  style={{ ...inputStyle, width: 130, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239096a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', paddingRight: 24 }}>
+                  <option value="QUICK_REPLY">Resposta Rápida</option>
+                  <option value="PHONE_NUMBER">Telefone</option>
+                  <option value="URL">URL</option>
+                </select>
+                <input value={btn.text} onChange={e => updateButton(i, 'text', e.target.value)}
+                  placeholder="Texto do botão"
+                  className="flex-1 h-9 rounded-[10px] px-3 text-[13px] outline-none"
+                  style={inputStyle} />
+                {btn.type === 'URL' && (
+                  <input value={btn.url || ''} onChange={e => updateButton(i, 'url', e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1 h-9 rounded-[10px] px-3 text-[13px] outline-none"
+                    style={inputStyle} />
+                )}
+                {btn.type === 'PHONE_NUMBER' && (
+                  <input value={btn.phone_number || ''} onChange={e => updateButton(i, 'phone_number', e.target.value)}
+                    placeholder="+55 11 99999-9999"
+                    className="flex-1 h-9 rounded-[10px] px-3 text-[13px] outline-none"
+                    style={inputStyle} />
+                )}
+                <button onClick={() => removeButton(i)} className="p-2 rounded-[8px] cursor-pointer hover:bg-white/5"
+                  style={{ color: 'var(--color-danger)' }}>
+                  <Trash2 size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+            Após envio, o Meta pode levar até 24h para aprovar.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={onClose}>Cancelar</Button>
+            <Button variant="primary" size="sm" onClick={handleCreate} disabled={saving || !body.trim() || !name.trim()}>
+              {saving ? 'Enviando...' : 'Criar Template'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
