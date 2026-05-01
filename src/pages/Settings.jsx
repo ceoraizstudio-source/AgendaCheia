@@ -77,6 +77,7 @@ function TabIntegracoes() {
   const [phoneId,     setPhoneId]     = useState('')
   const [businessId,  setBusinessId]  = useState('')
   const [pageId,      setPageId]      = useState('')
+  const [igFbPageId,  setIgFbPageId]  = useState('')
   const [verifyToken, setVerifyToken] = useState('agenda-cheia-2026')
   const [metaOpen,    setMetaOpen]    = useState(false)
   const [metaSaved,   setMetaSaved]   = useState(false)
@@ -98,6 +99,7 @@ function TabIntegracoes() {
     setPhoneId(integrations.whatsapp_phone_number_id  || '')
     setBusinessId(integrations.whatsapp_business_id   || '')
     setPageId(integrations.instagram_page_id          || '')
+    setIgFbPageId(integrations.instagram_fb_page_id  || '')
     setVerifyToken(integrations.meta_verify_token     || 'agenda-cheia-2026')
     setManychatKey(integrations.manychat_api_key     || '')
   }, [integrations])
@@ -109,6 +111,7 @@ function TabIntegracoes() {
       whatsapp_phone_number_id: phoneId,
       whatsapp_business_id: businessId,
       instagram_page_id: pageId,
+      instagram_fb_page_id: igFbPageId,
       meta_verify_token: verifyToken,
       meta_connected: !!metaToken && !!phoneId,
     })
@@ -219,9 +222,15 @@ function TabIntegracoes() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  Instagram Page ID
+                  Instagram Account ID
                 </label>
-                <Input placeholder="1234567890" value={pageId} onChange={e => setPageId(e.target.value)} />
+                <Input placeholder="17841442249009892" value={pageId} onChange={e => setPageId(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  Facebook Page ID (para envio)
+                </label>
+                <Input placeholder="320392301166392" value={igFbPageId} onChange={e => setIgFbPageId(e.target.value)} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
