@@ -66,7 +66,7 @@ export default function Settings() {
 
 /* ─── Tab Integrações ─────────────────────────────── */
 
-const N8N_BASE = 'https://n8n.metodoagendacheia.com.br/webhook'
+const AGENT_BASE = 'https://agent.metodoagendacheia.com.br'
 
 function TabIntegracoes() {
   const { integrations, loading, saving, fetchIntegrations, saveIntegrations } = useIntegrationsStore()
@@ -76,6 +76,8 @@ function TabIntegracoes() {
   const [phoneId,     setPhoneId]     = useState('')
   const [businessId,  setBusinessId]  = useState('')
   const [pageId,      setPageId]      = useState('')
+  const [appId,       setAppId]       = useState('')
+  const [appSecret,   setAppSecret]   = useState('')
   const [verifyToken, setVerifyToken] = useState('agenda-cheia-2026')
   const [metaOpen,    setMetaOpen]    = useState(false)
   const [metaSaved,   setMetaSaved]   = useState(false)
@@ -92,12 +94,14 @@ function TabIntegracoes() {
 
   useEffect(() => {
     if (!integrations) return
-    setMetaToken(integrations.meta_access_token   || '')
+    setMetaToken(integrations.meta_access_token      || '')
     setPhoneId(integrations.whatsapp_phone_number_id || '')
     setBusinessId(integrations.whatsapp_business_id  || '')
-    setPageId(integrations.instagram_page_id        || '')
-    setVerifyToken(integrations.meta_verify_token   || 'agenda-cheia-2026')
-    setManychatKey(integrations.manychat_api_key    || '')
+    setPageId(integrations.instagram_page_id         || '')
+    setAppId(integrations.meta_app_id                || '')
+    setAppSecret(integrations.meta_app_secret        || '')
+    setVerifyToken(integrations.meta_verify_token    || 'agenda-cheia-2026')
+    setManychatKey(integrations.manychat_api_key     || '')
   }, [integrations])
 
   const handleSaveMeta = async () => {
@@ -106,6 +110,8 @@ function TabIntegracoes() {
       whatsapp_phone_number_id: phoneId,
       whatsapp_business_id: businessId,
       instagram_page_id: pageId,
+      meta_app_id: appId,
+      meta_app_secret: appSecret,
       meta_verify_token: verifyToken,
       meta_connected: !!metaToken && !!phoneId,
     })
@@ -169,10 +175,10 @@ function TabIntegracoes() {
             {/* Webhook URLs para copiar */}
             <div className="flex flex-col gap-2">
               <p className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                URLs de Webhook — cole no Meta App
+                URLs de Webhook — cole no Meta App Dashboard
               </p>
-              <WebhookRow label="WhatsApp" url={`${N8N_BASE}/whatsapp-incoming`} />
-              <WebhookRow label="Instagram" url={`${N8N_BASE}/instagram-incoming`} />
+              <WebhookRow label="WhatsApp" url={`${AGENT_BASE}/webhook`} />
+              <WebhookRow label="Instagram" url={`${AGENT_BASE}/webhook/instagram`} />
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>Verify Token:</span>
                 <code className="text-[12px] px-2 py-0.5 rounded-[6px]"
@@ -218,6 +224,19 @@ function TabIntegracoes() {
                   Verify Token
                 </label>
                 <Input placeholder="agenda-cheia-2026" value={verifyToken} onChange={e => setVerifyToken(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  App ID (Meta)
+                </label>
+                <Input placeholder="123456789012345" value={appId} onChange={e => setAppId(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  App Secret (Meta)
+                </label>
+                <Input type="password" placeholder="••••••••••••••••••••••••••••••••"
+                  value={appSecret} onChange={e => setAppSecret(e.target.value)} />
               </div>
             </div>
 
@@ -335,9 +354,9 @@ function TabIntegracoes() {
               Webhook URL (ManyChat → n8n)
             </label>
             <div className="flex gap-2">
-              <Input value={`${N8N_BASE}/tiktok-incoming`} readOnly className="text-[11px] opacity-70" />
+              <Input value={`${AGENT_BASE}/webhook/tiktok`} readOnly className="text-[11px] opacity-70" />
               <button
-                onClick={() => navigator.clipboard.writeText(`${N8N_BASE}/tiktok-incoming`)}
+                onClick={() => navigator.clipboard.writeText(`${AGENT_BASE}/webhook/tiktok`)}
                 className="h-10 w-10 shrink-0 flex items-center justify-center rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity"
                 style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
               >
