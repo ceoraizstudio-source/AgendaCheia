@@ -7,10 +7,10 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { SlidersHorizontal, MoreHorizontal, Trash2 } from 'lucide-react'
+import { SlidersHorizontal, MoreHorizontal, Trash2, Phone } from 'lucide-react'
 import { useLeadsStore } from '../store/useLeadsStore'
 import { PIPELINE_STAGES } from '../lib/mockData'
-import { formatCurrency, cn } from '../lib/cn'
+import { cn } from '../lib/cn'
 import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import { formatDistanceToNow } from 'date-fns'
@@ -272,12 +272,20 @@ function DealCard({ lead, hidden }) {
         </div>
       </div>
 
-      <div
-        className="font-heading text-[20px]"
-        style={{ color: 'var(--color-accent)' }}
-      >
-        {formatCurrency(lead.valor_estimado)}
-      </div>
+      {lead.telefone && (
+        <a
+          href={`https://wa.me/${lead.telefone.replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-1.5 text-[12px] transition-colors hover:opacity-80"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          <Phone size={11} strokeWidth={1.5} />
+          {lead.telefone}
+        </a>
+      )}
 
       <div className="flex items-center justify-between gap-2 pt-1">
         <div className="flex items-center gap-2">
