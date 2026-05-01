@@ -69,6 +69,7 @@ function mapRow(row) {
     canal_origen: row.canal,
     valor_estimado: row.valor,
     pipeline_stage: row.etapa,
+    servico: row.servico || null,
     notas: row.notas,
     avatar: row.avatar,
     actualizado_en: row.updated_at,

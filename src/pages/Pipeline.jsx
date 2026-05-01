@@ -272,6 +272,26 @@ function DealCard({ lead, hidden }) {
         </div>
       </div>
 
+      {/* Serviço de interesse */}
+      {lead.servico && (
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="text-[12px] truncate"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            {lead.servico}
+          </span>
+          {lead.valor_estimado > 0 && (
+            <span
+              className="text-[12px] font-semibold shrink-0"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              {Number(lead.valor_estimado).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </span>
+          )}
+        </div>
+      )}
+
       {lead.telefone && (
         <a
           href={`https://wa.me/${lead.telefone.replace(/\D/g, '')}`}

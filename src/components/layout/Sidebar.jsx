@@ -7,6 +7,7 @@ import {
   Calendar as CalendarIcon,
   Settings as SettingsIcon,
   Plus,
+  Stethoscope,
 } from 'lucide-react'
 import Button from '../ui/Button'
 import { useUIStore } from '../../store/useUIStore'
@@ -16,6 +17,7 @@ const navItems = [
   { to: '/pipeline',   label: 'Funil',         icon: LayoutGrid   },
   { to: '/messaging',  label: 'Mensagens',      icon: MessageSquare, badge: true },
   { to: '/calendar',   label: 'Agenda',         icon: CalendarIcon },
+  { to: '/services',   label: 'Serviços',       icon: Stethoscope  },
   { to: '/analytics',  label: 'Análises',       icon: BarChart3    },
   { to: '/campaigns',  label: 'Campanhas',      icon: Megaphone    },
   { to: '/settings',   label: 'Configurações',  icon: SettingsIcon },
