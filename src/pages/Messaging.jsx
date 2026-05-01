@@ -698,6 +698,21 @@ function LeadDetail() {
           <div className="flex flex-col gap-2">
             <InfoRow label="Canal" value={conv.canal} />
             <InfoRow label="Modo" value={conv.modo === 'bot' ? 'Bot ativo' : 'Humano'} />
+            {conv.platform_contact_id && (
+              <InfoRow
+                label="Telefone"
+                value={
+                  <a
+                    href={`https://wa.me/${conv.platform_contact_id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: 'var(--color-accent)' }}
+                  >
+                    +{conv.platform_contact_id}
+                  </a>
+                }
+              />
+            )}
             <InfoRow label="Última mensagem" value={conv.last_message} />
           </div>
         </Section>
