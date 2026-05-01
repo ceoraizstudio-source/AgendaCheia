@@ -454,7 +454,7 @@ function TabAgente() {
             </label>
           </div>
           <textarea
-            rows={10} value={prompt} onChange={e => setPrompt(e.target.value)}
+            rows={22} value={prompt} onChange={e => setPrompt(e.target.value)}
             placeholder={`Você é um assistente cordial da [sua clínica/empresa].
 
 Seu objetivo é:
@@ -463,8 +463,14 @@ Seu objetivo é:
 - Agendar consultas quando o cliente quiser
 
 Tom: profissional e acolhedor. Responda de forma breve e natural, como no WhatsApp.`}
-            className="w-full rounded-[10px] px-3.5 py-3 text-[14px] resize-none outline-none transition-colors leading-relaxed font-mono"
-            style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+            className="w-full rounded-[10px] px-3.5 py-3 text-[13px] outline-none transition-colors leading-relaxed font-mono"
+            style={{
+              backgroundColor: 'var(--color-bg-elevated)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-primary)',
+              resize: 'vertical',
+              minHeight: '260px',
+            }}
             onFocus={e => { e.target.style.borderColor = 'var(--color-border-focus)' }}
             onBlur={e => { e.target.style.borderColor = 'var(--color-border)' }}
           />
