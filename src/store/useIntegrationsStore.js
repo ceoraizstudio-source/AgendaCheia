@@ -29,7 +29,10 @@ export const useIntegrationsStore = create((set, get) => ({
 
     const { data, error } = await supabase
       .from('integrations')
-      .upsert({ user_id: user.id, ...values, updated_at: new Date().toISOString() })
+      .upsert(
+        { user_id: user.id, ...values, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
       .select()
       .single()
 
