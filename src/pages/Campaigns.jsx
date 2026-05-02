@@ -8,42 +8,16 @@ import { supabase } from '../lib/supabase'
 
 const AGENT_URL = 'https://agent.metodoagendacheia.com.br'
 
-/* ─── Tabs ────────────────────────────────────────── */
-const TABS = [
-  { id: 'templates', label: '📋 Templates WhatsApp' },
-  { id: 'campanhas', label: '📊 Campanhas' },
-]
-
 export default function Campaigns() {
-  const [activeTab, setActiveTab] = useState('templates')
-
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-[28px]">Campanhas</h1>
+        <h1 className="text-[28px]">Templates WhatsApp</h1>
         <p className="text-[13px] mt-1" style={{ color: 'var(--color-text-secondary)' }}>
-          Gerencie templates WhatsApp e acompanhe o desempenho das campanhas.
+          Gerencie e envie templates aprovados pela Meta.
         </p>
       </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 rounded-[12px] w-fit"
-        style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border)' }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className="px-4 py-2 rounded-[9px] text-[13px] font-medium cursor-pointer transition-colors"
-            style={{
-              backgroundColor: activeTab === t.id ? 'var(--color-bg-elevated)' : 'transparent',
-              color: activeTab === t.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-              border: activeTab === t.id ? '1px solid var(--color-border)' : '1px solid transparent',
-            }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'templates' && <TabTemplates />}
-      {activeTab === 'campanhas' && <TabCampanhas />}
+      <TabTemplates />
     </div>
   )
 }

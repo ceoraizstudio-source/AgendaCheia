@@ -7,6 +7,7 @@ import {
   Settings as SettingsIcon,
   Plus,
   Stethoscope,
+  FileText,
 } from 'lucide-react'
 import Button from '../ui/Button'
 import { useUIStore } from '../../store/useUIStore'
@@ -15,6 +16,7 @@ import { useConversationsStore } from '../../store/useConversationsStore'
 const navItems = [
   { to: '/pipeline',   label: 'Funil',         icon: LayoutGrid   },
   { to: '/messaging',  label: 'Mensagens',      icon: MessageSquare, badge: true },
+  { to: '/campaigns',  label: 'Templates',      icon: FileText     },
   { to: '/calendar',   label: 'Agenda',         icon: CalendarIcon },
   { to: '/services',   label: 'Serviços',       icon: Stethoscope  },
   { to: '/analytics',  label: 'Análises',       icon: BarChart3    },

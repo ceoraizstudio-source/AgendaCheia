@@ -12,9 +12,7 @@ import {
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useConversationsStore } from '../store/useConversationsStore'
-import { channelMeta } from '../lib/mockData'
 import Avatar from '../components/ui/Avatar'
-import Badge from '../components/ui/Badge'
 import Switch from '../components/ui/Switch'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
@@ -178,7 +176,6 @@ function ConversationItem({ conv, active, onClick }) {
             {conv.last_message}
           </p>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Badge channel={conv.canal} className="!px-1.5 !py-0 !text-[10px]" />
             {conv.unread > 0 && (
               <span
                 className="min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
@@ -364,7 +361,6 @@ function ChatWindow() {
               <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                 {conv.online ? 'Online agora' : timeAgoShort(conv.last_at)}
               </span>
-              <Badge channel={conv.canal} className="!px-1.5 !py-0 !text-[10px]" />
             </div>
           </div>
         </div>
@@ -717,10 +713,6 @@ function LeadDetail() {
           </div>
         </Section>
 
-        {/* Channel badge */}
-        <Section label="Canal de origem">
-          <Badge channel={conv.canal} />
-        </Section>
       </div>
     </aside>
   )
