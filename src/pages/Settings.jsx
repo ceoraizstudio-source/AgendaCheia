@@ -9,9 +9,7 @@ import Input from '../components/ui/Input'
 import Switch from '../components/ui/Switch'
 import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
-import {
-  MetaIcon, GoogleIcon, EmailMarketingIcon,
-} from '../components/ui/BrandIcons'
+import { WhatsAppIcon } from '../components/ui/BrandIcons'
 import { useIntegrationsStore } from '../store/useIntegrationsStore'
 import { supabase } from '../lib/supabase'
 
@@ -79,10 +77,6 @@ function TabIntegracoes() {
   const [metaOpen,    setMetaOpen]    = useState(false)
   const [metaSaved,   setMetaSaved]   = useState(false)
 
-  // Email
-  const [emailPlatform, setEmailPlatform] = useState('')
-  const [emailKey,      setEmailKey]      = useState('')
-
   useEffect(() => { fetchIntegrations() }, [])
 
   useEffect(() => {
@@ -121,7 +115,7 @@ function TabIntegracoes() {
       <Card className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="shrink-0"><MetaIcon size={32} /></span>
+            <span className="shrink-0"><WhatsAppIcon size={32} /></span>
             <div>
               <p className="text-[14px] font-medium">Meta / WhatsApp</p>
               <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
@@ -211,64 +205,6 @@ function TabIntegracoes() {
             </div>
           </div>
         )}
-      </Card>
-
-      {/* ── Google ── */}
-      <Card>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="shrink-0"><GoogleIcon size={32} /></span>
-            <div>
-              <p className="text-[14px] font-medium">Google</p>
-              <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-                Ads + YouTube + Google Calendar
-              </p>
-            </div>
-          </div>
-          <Button variant="secondary" size="sm">Em breve</Button>
-        </div>
-      </Card>
-
-      {/* ── Email Marketing ── */}
-      <Card className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <span className="shrink-0"><EmailMarketingIcon size={32} /></span>
-          <div>
-            <p className="text-[14px] font-medium">E-mail Marketing</p>
-            <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-              Mailchimp / ActiveCampaign / Brevo
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>Plataforma</label>
-            <select
-              value={emailPlatform}
-              onChange={e => setEmailPlatform(e.target.value)}
-              className="h-10 rounded-[10px] px-3 text-[13px] outline-none cursor-pointer appearance-none"
-              style={{
-                backgroundColor: 'var(--color-bg-elevated)',
-                border: '1px solid var(--color-border)',
-                color: emailPlatform ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239096a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: 36,
-              }}
-            >
-              <option value="">Selecionar plataforma</option>
-              <option value="mailchimp">Mailchimp</option>
-              <option value="activecampaign">ActiveCampaign</option>
-              <option value="brevo">Brevo</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>API Key</label>
-            <Input type="password" placeholder="••••••••••••" value={emailKey} onChange={e => setEmailKey(e.target.value)} />
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <Button variant="primary" size="sm">Em breve</Button>
-        </div>
       </Card>
 
     </div>

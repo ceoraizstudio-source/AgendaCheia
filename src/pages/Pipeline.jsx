@@ -7,7 +7,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { SlidersHorizontal, MoreHorizontal, Trash2, Phone } from 'lucide-react'
+import { SlidersHorizontal, MoreHorizontal, Trash2, Phone, Download } from 'lucide-react'
 import { useLeadsStore } from '../store/useLeadsStore'
 import { PIPELINE_STAGES } from '../lib/mockData'
 import { cn } from '../lib/cn'
@@ -19,6 +19,31 @@ const filters = [
   { id: 'all', label: 'Todos Ativos' },
   { id: 'high', label: 'Alto Valor' },
 ]
+
+function escapeXML(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+}
+
+function downloadLeadsXML(leads) {
+  const rows = leads.map(l => `  <lead>
+    <nome>${escapeXML(l.nombre)}</nome>
+    <telefone>${escapeXML(l.telefone)}</telefone>
+    <email>${escapeXML(l.email)}</email>
+    <etapa>${escapeXML(l.pipeline_stage)}</etapa>
+    <servico>${escapeXML(l.servico)}</servico>
+    <valor>${l.valor_estimado || ''}</valor>
+  </lead>`).join('\n')
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<leads>\n${rows}\n</leads>`
+  const blob = new Blob([xml], { type: 'application/xml' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `leads_${new Date().toISOString().slice(0,10)}.xml`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 export default function Pipeline() {
   const { leads, loading, moveLead, fetchLeads } = useLeadsStore()
@@ -102,6 +127,17 @@ export default function Pipeline() {
             aria-label="Filtros"
           >
             <SlidersHorizontal size={16} strokeWidth={1.5} />
+          </button>
+          <button
+            onClick={() => downloadLeadsXML(leads)}
+            title="Exportar leads em XML"
+            className="h-9 w-9 rounded-[10px] flex items-center justify-center cursor-pointer hover:bg-white/5"
+            style={{
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <Download size={16} strokeWidth={1.5} />
           </button>
         </div>
       </div>
