@@ -12,7 +12,6 @@ import { useLeadsStore } from '../store/useLeadsStore'
 import { PIPELINE_STAGES } from '../lib/mockData'
 import { cn } from '../lib/cn'
 import Avatar from '../components/ui/Avatar'
-import Badge from '../components/ui/Badge'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -307,17 +306,14 @@ function DealCard({ lead, hidden }) {
         </a>
       )}
 
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <div className="flex items-center gap-2">
-          <Avatar src={lead.avatar} name={lead.nombre || ''} size="xs" />
-          <span
-            className="text-[11px]"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            {timeAgo(lead.actualizado_en)}
-          </span>
-        </div>
-        <Badge channel={lead.canal_origen} />
+      <div className="flex items-center gap-2 pt-1">
+        <Avatar src={lead.avatar} name={lead.nombre || ''} size="xs" />
+        <span
+          className="text-[11px]"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {timeAgo(lead.actualizado_en)}
+        </span>
       </div>
     </div>
   )

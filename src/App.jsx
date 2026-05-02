@@ -6,7 +6,6 @@ import Login from './pages/Login'
 import Pipeline from './pages/Pipeline'
 import Messaging from './pages/Messaging'
 import Analytics from './pages/Analytics'
-import Campaigns from './pages/Campaigns'
 import Calendar from './pages/Calendar'
 import Settings from './pages/Settings'
 import Services from './pages/Services'
@@ -36,7 +35,6 @@ export default function App() {
           <Route path="/pipeline" element={<Pipeline />} />
           <Route path="/messaging" element={<Messaging />} />
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/campaigns" element={<Campaigns />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/services" element={<Services />} />

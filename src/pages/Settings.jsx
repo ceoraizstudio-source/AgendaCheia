@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  CheckCircle, Link, AlertTriangle, Copy, Camera,
+  CheckCircle, Link, Copy, Camera,
   Eye, EyeOff, Bot, Clock, User, ChevronDown, ChevronUp,
   Loader2,
 } from 'lucide-react'
@@ -10,7 +10,7 @@ import Switch from '../components/ui/Switch'
 import Avatar from '../components/ui/Avatar'
 import Card from '../components/ui/Card'
 import {
-  MetaIcon, GoogleIcon, TikTokIcon, ManyChatIcon, EmailMarketingIcon,
+  MetaIcon, GoogleIcon, EmailMarketingIcon,
 } from '../components/ui/BrandIcons'
 import { useIntegrationsStore } from '../store/useIntegrationsStore'
 import { supabase } from '../lib/supabase'
@@ -71,20 +71,13 @@ const AGENT_BASE = 'https://agent.metodoagendacheia.com.br'
 function TabIntegracoes() {
   const { integrations, loading, saving, fetchIntegrations, saveIntegrations } = useIntegrationsStore()
 
-  // Meta fields
+  // Meta / WhatsApp fields
   const [metaToken,   setMetaToken]   = useState('')
-  const [igPageToken, setIgPageToken] = useState('')
   const [phoneId,     setPhoneId]     = useState('')
   const [businessId,  setBusinessId]  = useState('')
-  const [pageId,      setPageId]      = useState('')
-  const [igFbPageId,  setIgFbPageId]  = useState('')
   const [verifyToken, setVerifyToken] = useState('agenda-cheia-2026')
   const [metaOpen,    setMetaOpen]    = useState(false)
   const [metaSaved,   setMetaSaved]   = useState(false)
-
-  // ManyChat fields
-  const [manychatKey,   setManychatKey]   = useState('')
-  const [manychatSaved, setManychatSaved] = useState(false)
 
   // Email
   const [emailPlatform, setEmailPlatform] = useState('')
@@ -94,40 +87,24 @@ function TabIntegracoes() {
 
   useEffect(() => {
     if (!integrations) return
-    setMetaToken(integrations.meta_access_token        || '')
-    setIgPageToken(integrations.instagram_page_token  || '')
+    setMetaToken(integrations.meta_access_token       || '')
     setPhoneId(integrations.whatsapp_phone_number_id  || '')
     setBusinessId(integrations.whatsapp_business_id   || '')
-    setPageId(integrations.instagram_page_id          || '')
-    setIgFbPageId(integrations.instagram_fb_page_id  || '')
     setVerifyToken(integrations.meta_verify_token     || 'agenda-cheia-2026')
-    setManychatKey(integrations.manychat_api_key     || '')
   }, [integrations])
 
   const handleSaveMeta = async () => {
     const ok = await saveIntegrations({
       meta_access_token: metaToken,
-      instagram_page_token: igPageToken,
       whatsapp_phone_number_id: phoneId,
       whatsapp_business_id: businessId,
-      instagram_page_id: pageId,
-      instagram_fb_page_id: igFbPageId,
       meta_verify_token: verifyToken,
       meta_connected: !!metaToken && !!phoneId,
     })
     if (ok) { setMetaSaved(true); setTimeout(() => setMetaSaved(false), 2000) }
   }
 
-  const handleSaveManyChat = async () => {
-    const ok = await saveIntegrations({
-      manychat_api_key: manychatKey,
-      manychat_connected: !!manychatKey,
-    })
-    if (ok) { setManychatSaved(true); setTimeout(() => setManychatSaved(false), 2000) }
-  }
-
   const metaConnected = integrations?.meta_connected
-  const manychatConnected = integrations?.manychat_connected
 
   if (loading) {
     return (
@@ -146,9 +123,9 @@ function TabIntegracoes() {
           <div className="flex items-center gap-3">
             <span className="shrink-0"><MetaIcon size={32} /></span>
             <div>
-              <p className="text-[14px] font-medium">Meta Business</p>
+              <p className="text-[14px] font-medium">Meta / WhatsApp</p>
               <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-                WhatsApp + Instagram DMs
+                WhatsApp Business API
               </p>
             </div>
           </div>
@@ -175,10 +152,9 @@ function TabIntegracoes() {
             {/* Webhook URLs para copiar */}
             <div className="flex flex-col gap-2">
               <p className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                URLs de Webhook — cole no Meta App Dashboard
+                URL de Webhook — cole no Meta App Dashboard
               </p>
               <WebhookRow label="WhatsApp" url={`${AGENT_BASE}/webhook`} />
-              <WebhookRow label="Instagram" url={`${AGENT_BASE}/webhook/instagram`} />
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>Verify Token:</span>
                 <code className="text-[12px] px-2 py-0.5 rounded-[6px]"
@@ -203,13 +179,6 @@ function TabIntegracoes() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  Instagram Page Token (permanente)
-                </label>
-                <Input type="password" placeholder="EAAxxxxxxxxxxxxxxxx"
-                  value={igPageToken} onChange={e => setIgPageToken(e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
                   WhatsApp Phone Number ID
                 </label>
                 <Input placeholder="1234567890" value={phoneId} onChange={e => setPhoneId(e.target.value)} />
@@ -219,18 +188,6 @@ function TabIntegracoes() {
                   WhatsApp Business ID
                 </label>
                 <Input placeholder="1234567890" value={businessId} onChange={e => setBusinessId(e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  Instagram Account ID
-                </label>
-                <Input placeholder="17841442249009892" value={pageId} onChange={e => setPageId(e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                  Facebook Page ID (para envio)
-                </label>
-                <Input placeholder="320392301166392" value={igFbPageId} onChange={e => setIgFbPageId(e.target.value)} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
@@ -314,71 +271,6 @@ function TabIntegracoes() {
         </div>
       </Card>
 
-      {/* ── TikTok + ManyChat ── */}
-      <Card className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="shrink-0"><TikTokIcon size={32} /></span>
-            <div>
-              <p className="text-[14px] font-medium">TikTok via ManyChat</p>
-              <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-                Mensagens do TikTok DM
-              </p>
-            </div>
-          </div>
-          {manychatConnected && (
-            <div className="flex items-center gap-1.5 text-[12px]" style={{ color: 'var(--color-success)' }}>
-              <CheckCircle size={14} strokeWidth={1.5} /> Conectado
-            </div>
-          )}
-        </div>
-
-        <div
-          className="flex items-start gap-2 rounded-[10px] p-3 text-[12px]"
-          style={{ backgroundColor: 'rgba(245,166,35,0.08)', border: '1px solid rgba(245,166,35,0.2)', color: 'var(--color-text-secondary)' }}
-        >
-          <AlertTriangle size={14} strokeWidth={1.5} className="mt-0.5 shrink-0" style={{ color: 'var(--color-accent)' }} />
-          O TikTok não permite leitura direta de DMs. Configure o ManyChat para reencaminhar as mensagens via webhook.
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              API Key ManyChat
-            </label>
-            <Input type="password" placeholder="••••••••••••"
-              value={manychatKey} onChange={e => setManychatKey(e.target.value)} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              Webhook URL (ManyChat → n8n)
-            </label>
-            <div className="flex gap-2">
-              <Input value={`${AGENT_BASE}/webhook/tiktok`} readOnly className="text-[11px] opacity-70" />
-              <button
-                onClick={() => navigator.clipboard.writeText(`${AGENT_BASE}/webhook/tiktok`)}
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
-              >
-                <Copy size={14} strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          {manychatSaved && (
-            <span className="text-[12px] flex items-center gap-1.5" style={{ color: 'var(--color-success)' }}>
-              <CheckCircle size={13} strokeWidth={2} /> Salvo com sucesso
-            </span>
-          )}
-          <div className="ml-auto">
-            <Button variant="primary" size="sm" onClick={handleSaveManyChat} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </div>
-        </div>
-      </Card>
     </div>
   )
 }

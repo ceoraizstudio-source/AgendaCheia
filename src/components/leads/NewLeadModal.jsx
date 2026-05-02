@@ -6,9 +6,7 @@ import Button from '../ui/Button'
 import Input from '../ui/Input'
 
 const CANAIS = [
-  { value: 'instagram', label: 'Instagram' },
   { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'tiktok', label: 'TikTok' },
   { value: 'manual', label: 'Manual' },
 ]
 
@@ -24,7 +22,7 @@ const INITIAL = {
   nombre: '',
   email: '',
   telefone: '',
-  canal_origen: 'instagram',
+  canal_origen: 'whatsapp',
   valor_estimado: '',
   pipeline_stage: 'new_lead',
   notas: '',

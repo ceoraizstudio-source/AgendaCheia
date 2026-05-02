@@ -3,7 +3,6 @@ import {
   LayoutGrid,
   MessageSquare,
   BarChart3,
-  Megaphone,
   Calendar as CalendarIcon,
   Settings as SettingsIcon,
   Plus,
@@ -19,7 +18,6 @@ const navItems = [
   { to: '/calendar',   label: 'Agenda',         icon: CalendarIcon },
   { to: '/services',   label: 'Serviços',       icon: Stethoscope  },
   { to: '/analytics',  label: 'Análises',       icon: BarChart3    },
-  { to: '/campaigns',  label: 'Campanhas',      icon: Megaphone    },
   { to: '/settings',   label: 'Configurações',  icon: SettingsIcon },
 ]
 
